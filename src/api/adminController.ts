@@ -46,6 +46,15 @@ export const adminController={
           catch(error){
             throw error;
           }
+    },
+    getAllEvents:async ()=>{
+        try{
+           const result=await publicAdminApi.get("/all-events");
+           return result;
+        }
+        catch(error){
+            throw error;
+        }
     }
 
 }

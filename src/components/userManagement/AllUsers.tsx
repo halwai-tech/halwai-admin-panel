@@ -16,44 +16,37 @@ import {
   Chip,
   Skeleton,
 } from "@mui/material";
-import { adminController } from "@/api/adminController";
+import { userController } from "@/api/userController";
 import { COLORS } from "@/utils/colors";
+import { grotesk } from "@/utils/fonts";
 
-interface EventCategory{
-  _id:string;
-  eventCategoryName:string[]
-
-}
-interface Event {
-  _id: string;
-  eventName: string;
-  categories: EventCategory[];
-  tags: string[];
-  image: string;
-}
-
-const EventsListPage = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+const AllUsers = () => {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState<number>(0); // frontend pagination starts at 0
   const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
 
+  // Fetch users from backend API
+  const fetchUsers = async (pageNumber: number, limit: number) => {
+    try {
+      setLoading(true);
+      const response = await userController.getAllUsers(pageNumber + 1, limit);
+      const responseData = response?.data;
+
+      setUsers(responseData?.data || []);
+      setTotalUsers(responseData?.totalUsers || 0);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setLoading(false);
+    }
+  };
+
+  
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await adminController.getAllEvents();
-        console.log("Events:" , response?.data?.data);
-        setEvents(response?.data?.data || []);
-       
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
+    fetchUsers(page, rowsPerPage);
+  }, [page, rowsPerPage]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -66,15 +59,10 @@ const EventsListPage = () => {
     setPage(0);
   };
 
-  const paginatedEvents = events.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
   return (
     <Box p={3}>
-      <Typography variant="h5" fontWeight="bold" gutterBottom>
-        All Events
+      <Typography variant="h5" fontWeight="bold" sx={{fontFamily:grotesk.style}} gutterBottom>
+        All Users
       </Typography>
 
       <Paper elevation={2}>
@@ -83,22 +71,23 @@ const EventsListPage = () => {
             <TableHead sx={{ backgroundColor: COLORS.primary }}>
               <TableRow>
                 <TableCell sx={{ color: COLORS.white }}>
-                  <strong>Image</strong>
+                  <strong>Avatar</strong>
                 </TableCell>
                 <TableCell sx={{ color: COLORS.white }}>
-                  <strong>Event Name</strong>
+                  <strong>Username</strong>
                 </TableCell>
                 <TableCell sx={{ color: COLORS.white }}>
-                  <strong>Categories</strong>
+                  <strong>Email</strong>
                 </TableCell>
                 <TableCell sx={{ color: COLORS.white }}>
-                  <strong>Tags</strong>
+                  <strong>Role</strong>
                 </TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {loading
-                ? Array.from(new Array(5)).map((_, index) => (
+                ? Array.from(new Array(rowsPerPage)).map((_, index) => (
                     <TableRow key={index}>
                       <TableCell>
                         <Skeleton
@@ -112,52 +101,40 @@ const EventsListPage = () => {
                         <Skeleton width={120} height={20} animation="wave" />
                       </TableCell>
                       <TableCell>
-                        <Skeleton width={80} height={20} animation="wave" />
+                        <Skeleton width={180} height={20} animation="wave" />
                       </TableCell>
                       <TableCell>
-                        <Skeleton width={100} height={20} animation="wave" />
+                        <Skeleton width={80} height={20} animation="wave" />
                       </TableCell>
                     </TableRow>
                   ))
-                : paginatedEvents.map((event) => (
-                    <TableRow key={event._id}>
+                : users.map((user: any) => (
+                    <TableRow key={user._id}>
                       <TableCell>
                         <Avatar
-                          src={event.image}
-                          alt={event.eventName}
+                          src={`https://ui-avatars.com/api/?name=${user.username}`}
+                          alt={user.username}
                           sx={{ width: 50, height: 50 }}
                         />
                       </TableCell>
-                      <TableCell>{event.eventName}</TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        {event.categories.length>=1 ? (event.categories.map((cat, index) => (
-                          <Chip
-                            key={cat?._id}
-                            label={cat?.eventCategoryName}
-                            color="primary"
-                            size="small"
-                            sx={{ mr: 0.5, mb: 0.5 }}
-                          />
-                        ))):"--"}
-                      </TableCell>
-                      <TableCell>
-                        {event?.tags?.length>=1?(event.tags.map((tag, index) => (
-                          <Chip
-                            key={index}
-                            label={tag}
-                            color="secondary"
-                            size="small"
-                            sx={{ mr: 0.5, mb: 0.5 }}
-                          />
-                        ))):"--"}
+                        <Chip
+                          label={user.role.toUpperCase()}
+                          color={
+                            user.role === "admin" ? "secondary" : "primary"
+                          }
+                          size="small"
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
 
-              {!loading && paginatedEvents.length === 0 && (
+              {!loading && users.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    No events found.
+                    No users found.
                   </TableCell>
                 </TableRow>
               )}
@@ -168,7 +145,7 @@ const EventsListPage = () => {
         {!loading && (
           <TablePagination
             component="div"
-            count={events.length}
+            count={totalUsers}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
@@ -181,4 +158,4 @@ const EventsListPage = () => {
   );
 };
 
-export default EventsListPage;
+export default AllUsers;

@@ -19,16 +19,13 @@ export const sidebarConfig = [
     ],
   },
   {
-    label: "Manage Halwai",
+    label: "User Management",
     icon: <RestaurantMenuIcon fontSize="small" />,
     children: [
-      {
-        label: "Listing & Profiles",
-        children: [
-          { label: "Halwai List", path: "/halwais/list" },
-          { label: "Add Halwai", path: "/halwais/create" },
-        ],
-      },
+      { label: "All Users", path: "/user-management/all-users" },
+      { label: "All Halwais", path: "/user-management/halwai-list" },
+      { label: "User Enquiries", path: "/user-management/enquiry" },
+      { label: "Add New Halwai", path: "/user-management/halwai/create" },
     ],
   },
 ];

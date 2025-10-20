@@ -22,6 +22,14 @@ export const publicAdminApi=axios.create({
   baseURL:ApiUrl.adminUrl
 })
 
+export const publicUserApi=axios.create({
+  baseURL:ApiUrl.userUrl
+})
+
+export const publicEnquiryApi=axios.create({
+  baseURL:ApiUrl.enquiryUrl
+})
+
 
 // adding token to headers for making it secure
 securedAdminApi.interceptors.request.use(

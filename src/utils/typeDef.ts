@@ -3,6 +3,7 @@ export interface IRegisterUser{
     username:string;
     email:string;
     password:string;
+    phone:string,
     role:"admin" | "halwai" | "user";
 }
 

@@ -43,7 +43,7 @@ export default function Sidebar() {
             color: "white",
           }}
         >
-          Halwai Admin
+          ADMIN PANEL
         </span>
       </Toolbar>
 

@@ -21,6 +21,7 @@ import { useDropzone } from "react-dropzone";
 import { COLORS } from "@/utils/colors";
 import { useDispatch, UseDispatch } from "react-redux";
 import { showToast } from "@/redux/slices/toastSlice";
+import { IEventCategory } from "@/utils/typeDef";
 
 
 type EventFormValues = {
@@ -40,6 +41,7 @@ export default function AddEventForm() {
 
   const dispatch=useDispatch();
   const [preview, setPreview] = useState<string | null>(null);
+  const [categories,setCategories]=useState<IEventCategory[]>([]);
  
 
   const initialValues: EventFormValues = {
@@ -55,6 +57,23 @@ export default function AddEventForm() {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
+
+
+  // fetch all categories
+  useEffect(()=>{
+     try{
+        async function fetchCategories(){
+              let response=await adminController.getAllCategory();
+              setCategories(response?.data?.data);
+
+        }
+
+        fetchCategories();
+     }
+     catch(error){
+      console.log("error in fetching categories: ",error);
+     }
+  },[]);
 
   const handleSubmit = async (
     values: EventFormValues,
@@ -157,15 +176,15 @@ export default function AddEventForm() {
                         formik.setFieldValue("categories", e.target.value)
                       }
                       renderValue={(selected) =>
-                        categoriesOptions
-                          .filter((cat) => selected.includes(cat.id))
-                          .map((cat) => cat.label)
+                        categories
+                          .filter((cat) => selected.includes(cat._id))
+                          .map((cat) => cat.eventCategoryName)
                           .join(", ")
                       }
                     >
-                      {categoriesOptions.map((cat) => (
-                        <MenuItem key={cat.id} value={cat.id}>
-                          {cat.label}
+                      {categories.map((cat) => (
+                        <MenuItem key={cat._id} value={cat._id}>
+                          {cat.eventCategoryName}
                         </MenuItem>
                       ))}
                     </Select>

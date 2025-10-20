@@ -12,7 +12,7 @@ import Cookies from "js-cookie";
 import NextLink from "next/link";
 import Image from "next/image";
 import { COLORS } from "@/utils/colors";
-import { Formik, Form, FormikHelpers } from "formik";
+import { Formik, Form } from "formik";
 import { RegisterSchema } from "@/utils/validationSchema";
 import { useRouter } from "next/navigation";
 import { authController } from "@/api/authController";
@@ -24,34 +24,40 @@ export default function CreateHalwai() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const handleSubmit = async (values: IRegisterUser,{resetForm}:FormikHelpers<IRegisterUser>) => {
+  const handleSubmit = async (values: IRegisterUser) => {
     try {
+      values.role = "halwai";
       let response = await authController.registerUser(values);
       console.log("response:", response);
 
       // Adjust this depending on your API response structure
       const token = response.data.token;
-      const username=response.data.user.username.toUpperCase();
 
       if (token) {
+        // Save token in cookie (expires in 7 days)
+        // Cookies.set("auth_token", token, {
+        //   expires: 7,
+        //   secure: process.env.NODE_ENV === "production",
+        //   sameSite: "Lax",
+        //   path: "/",
+        // });
 
-         dispatch(
+        // console.log("Token saved in cookie");
+        dispatch(
           showToast({
-            message: `${username} Added Successfully!`,
+            message: "New Halwai Added Successfull!",
             type: "success",
           })
         );
-       
-    
+
+        // Redirect to dashboard or home page after login
+        // router.push("/");
       }
     } catch (error: any) {
-      console.error("Registration error:", error.message);
+      console.error("Error in Adding the New Halwai: ", error.message);
       dispatch(
-        showToast({ message: "Error In Adding New Halwai!", type: "error" })
+        showToast({ message: "Error in Adding the New Halwai!", type: "error" })
       );
-    }
-    finally{
-        resetForm();
     }
   };
 
@@ -87,7 +93,7 @@ export default function CreateHalwai() {
       >
         <Box sx={{ width: "100%", maxWidth: 400 }}>
           <Typography variant="h5" component="h1" align="center" gutterBottom>
-            Create New Halwai
+            Add New Halwai
           </Typography>
 
           <Formik
@@ -95,68 +101,103 @@ export default function CreateHalwai() {
               username: "",
               email: "",
               password: "",
+              phone: "",
               role: "halwai",
             }}
             validationSchema={RegisterSchema}
             onSubmit={handleSubmit}
+            validateOnChange={true}
+            validateOnBlur={true}
           >
-            {({ handleChange, values, touched, errors }) => (
+            {({
+              handleChange,
+              values,
+              touched,
+              errors,
+              setFieldTouched,
+              validateField,
+            }) => (
               <Form noValidate>
                 <TextField
-                  label="Username"
+                  label="Halwai Username"
                   name="username"
                   fullWidth
                   variant="outlined"
                   margin="normal"
                   value={values.username}
-                  onChange={handleChange}
-                  error={touched.username && Boolean(errors.username)}
-                  helperText={touched.username && errors.username}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (!touched.username)
+                      setFieldTouched("username", true, false);
+                    validateField("username");
+                  }}
+                  error={!!errors.username}
+                  helperText={errors.username}
                 />
 
                 <TextField
-                  label="Email"
+                  label="Halwai Email"
                   name="email"
                   type="email"
                   fullWidth
                   variant="outlined"
                   margin="normal"
                   value={values.email}
-                  onChange={handleChange}
-                  error={touched.email && Boolean(errors.email)}
-                  helperText={touched.email && errors.email}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (!touched.email) setFieldTouched("email", true, false);
+                    validateField("email");
+                  }}
+                  error={!!errors.email}
+                  helperText={errors.email}
                 />
 
                 <TextField
-                  label="Password"
+                  label="Halwai Password"
                   name="password"
                   type="password"
                   fullWidth
                   variant="outlined"
                   margin="normal"
                   value={values.password}
-                  onChange={handleChange}
-                  error={touched.password && Boolean(errors.password)}
-                  helperText={touched.password && errors.password}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (!touched.password)
+                      setFieldTouched("password", true, false);
+                    validateField("password");
+                  }}
+                  error={!!errors.password}
+                  helperText={errors.password}
+                />
+
+                <TextField
+                  label="Halwai Phone Number"
+                  name="phone"
+                  type="text"
+                  fullWidth
+                  variant="outlined"
+                  margin="normal"
+                  value={values.phone}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (!touched.phone) setFieldTouched("phone", true, false);
+                    validateField("phone");
+                  }}
+                  error={!!errors.phone}
+                  helperText={errors.phone}
                 />
 
                 <Button
                   type="submit"
                   variant="contained"
                   fullWidth
-                  sx={{
-                    mt: 2,
-                    backgroundColor: COLORS.primary,
-                    "&:hover": { backgroundColor: COLORS.primary },
-                  }}
+                  sx={{ mt: 2, backgroundColor: COLORS.primary }}
                 >
-                  Add Halwai
+                  Add
                 </Button>
               </Form>
             )}
           </Formik>
-
-         
         </Box>
       </Grid>
     </Grid>
