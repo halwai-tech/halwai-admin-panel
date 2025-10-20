@@ -100,6 +100,7 @@ export default function Register() {
               username: "",
               email: "",
               password: "",
+              phone:"",
               role: "admin",
             }}
             validationSchema={RegisterSchema}
@@ -143,6 +144,19 @@ export default function Register() {
                   onChange={handleChange}
                   error={touched.password && Boolean(errors.password)}
                   helperText={touched.password && errors.password}
+                />
+
+                  <TextField
+                  label="Phone"
+                  name="phone"
+                  type="text"
+                  fullWidth
+                  variant="outlined"
+                  margin="normal"
+                  value={values.phone}
+                  onChange={handleChange}
+                  error={touched.phone && Boolean(errors.phone)}
+                  helperText={touched.phone && errors.phone}
                 />
 
                 <Button
